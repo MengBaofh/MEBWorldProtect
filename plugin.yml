@@ -18,6 +18,3 @@ permissions:
  MEBWorldProtect.ge:
   default: true
   description: General command
- MEBWorldProtect.admin:
-  default: op
-  description: Admin permission to bypass all protections

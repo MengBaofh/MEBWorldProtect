@@ -105,7 +105,7 @@ class Main extends PluginBase
     /**
      * 检查玩家是否是 MEBSociety 的最高权限
      */
-    private function isMEBSocietyMaster(string $playerName): bool
+    public function isMEBSocietyMaster(string $playerName): bool
     {
         $mebsPlugin = $this->getServer()->getPluginManager()->getPlugin("MEBSociety");
         if ($mebsPlugin === null || !$mebsPlugin->isEnabled()) {

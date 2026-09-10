@@ -4,15 +4,12 @@
 
 ## 功能特性
 
-- 🛡️ **全面保护系统**：13种可独立配置的保护规则
-- 🌊 **液体流动控制**：独立控制水和岩浆的流动
-- 🐾 **生物行为管理**：恢复或限制生物的移动和攻击能力
+- 🎨 **完整GUI支持**：所有功能均有GUI（需安装MEBForms）
+- 🛡️ **全面保护系统**：13种可独立配置的保护规则（方块交互、液体流动、生物行为等）
 - 👥 **世界管理员系统**：为每个世界单独添加管理员
-- 🎨 **完整GUI支持**：可选的MEBForms图形界面（所有功能均有GUI）
 - 🌍 **按世界配置**：每个世界独立设置保护选项
 - 🔒 **分级权限管理**：全局管理员和世界管理员分离
-- 🌐 **多语言支持**：支持中文和英文
-- ⚙️ **灵活配置**：支持指令和GUI两种配置方式
+- 🌐 **多语言支持**：支持中文和英文等多语言，可在游戏内切换
 
 ## 保护规则
 
@@ -30,23 +27,23 @@
 | **lava** | 禁止岩浆流动 |
 | **drop** | 禁止丢弃物品 |
 | **pickup** | 禁止拾取物品 |
-| **mob** | 恢复生物原版行为 |
+| **mob** | 恢复生物行为（移动和攻击，需要生物AI） |
 
 ## 指令
 
 | 指令 | 描述 | 权限 |
 |------|------|------|
 | `/mebwp help` | 显示帮助信息 | MEBWorldProtect.ge |
-| `/mebwp` | 打开GUI界面 | MEBWorldProtect.ge |
+| `/mebwp` 或 `/mebwp gui` | 打开GUI界面 | MEBWorldProtect.ge |
 | `/mebwp info [世界名]` | 查看世界保护信息 | MEBWorldProtect.ge |
 | `/mebwp list` | 列出所有已保护的世界 | MEBWorldProtect.ge |
 | `/mebwp listadmin [世界名]` | 查看世界管理员列表 | MEBWorldProtect.ge |
-| `/mebwp enable <世界名>` | 启用世界保护 | MEBWorldProtect.admin |
-| `/mebwp disable <世界名>` | 禁用世界保护 | MEBWorldProtect.admin |
-| `/mebwp set <世界名> <规则> <true\|false>` | 设置保护规则 | 世界管理员 |
-| `/mebwp addadmin <世界名> <玩家>` | 添加世界管理员 | MEBWorldProtect.admin |
-| `/mebwp removeadmin <世界名> <玩家>` | 移除世界管理员 | MEBWorldProtect.admin |
-| `/mebwp reload` | 重载配置 | MEBWorldProtect.admin |
+| `/mebwp enable <世界名>` | 启用世界保护 | 控制台或世界管理员 |
+| `/mebwp disable <世界名>` | 禁用世界保护 | 控制台或世界管理员 |
+| `/mebwp set <世界名> <规则> <true\|false>` | 设置保护规则 | 控制台或世界管理员 |
+| `/mebwp addadmin <世界名> <玩家>` | 添加世界管理员 | 控制台或MEBSociety最高权限 |
+| `/mebwp removeadmin <世界名> <玩家>` | 移除世界管理员 | 控制台或MEBSociety最高权限 |
+| `/mebwp reload` | 重载配置 | 控制台或MEBSociety最高权限 |
 
 ### 规则名称
 
@@ -54,30 +51,26 @@
 break, place, interact, container, pvp, pve, explosion, fire, water, lava, drop, pickup, mob
 ```
 
-## 权限
-
-- `MEBWorldProtect.ge`（默认：所有玩家）- 基础权限，可使用查询命令
-- `MEBWorldProtect.admin`（默认：OP）- 全局管理权限，可无视所有保护规则并管理所有世界
-
 ## 权限系统
 
 ### 两级权限管理
 
-1. **全局管理员**（`MEBWorldProtect.admin` 或 MEBSociety 最高权限）
+1. **MEBSociety 最高权限 或 控制台**
+   - MEBSociety 插件配置中的"最高权限"玩家
    - 可以无视所有世界的保护规则
    - 可以启用/禁用任何世界的保护
-   - 可以添加/移除任何世界的管理员
    - 可以配置任何世界的保护规则
+   - 可以添加/移除任何世界的管理员
+   - 可以重载配置
 
-2. **世界管理员**（通过命令添加）
+2. **世界管理员**（通过命令添加到特定世界）
    - 只能无视指定世界的保护规则
+   - 可以启用/禁用被授权世界的保护
    - 可以配置被授权世界的保护规则
-   - 可以为被授权世界添加/移除其他管理员
-   - 无法启用/禁用世界保护（仅全局管理员可以）
+   - **不能**添加/移除管理员（仅 MEBSociety 最高权限或控制台）
+   - **不能**重载配置（仅 MEBSociety 最高权限或控制台）
 
-### MEBSociety 集成
-
-如果安装了 MEBSociety 插件，MEBSociety 的"最高权限"玩家将自动获得全局管理员权限，无需额外配置。
+> **注意**：插件不使用OP权限或权限节点，所有管理权限完全基于配置文件中的管理员名单。添加/删除管理员和重载配置仅限控制台或 MEBSociety 最高权限执行。
 
 ## 使用示例
 
@@ -101,11 +94,6 @@ break, place, interact, container, pvp, pve, explosion, fire, water, lava, drop,
 /mebwp set world water true
 ```
 
-### 恢复下界生物行为
-```
-/mebwp set nether mob true
-```
-
 ### 查看当前世界信息
 ```
 /mebwp info
@@ -114,11 +102,6 @@ break, place, interact, container, pvp, pve, explosion, fire, water, lava, drop,
 ### 查看世界管理员列表
 ```
 /mebwp listadmin world
-```
-
-### 使用GUI管理（推荐）
-```
-/mebwp gui
 ```
 
 ## 配置说明

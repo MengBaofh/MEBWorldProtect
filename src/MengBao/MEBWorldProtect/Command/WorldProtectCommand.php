@@ -125,7 +125,7 @@ class WorldProtectCommand
                     $sender->sendMessage($this->plugin->getLang()->get("prefix") . "§c" . $this->plugin->getLang()->get("player_only"));
                     return true;
                 }
-                if ($sender instanceof Player && !$this->plugin->isAdmin($sender->getName())) {
+                if ($sender instanceof Player && !$this->plugin->isMEBSocietyMaster($sender->getName())) {
                     $sender->sendMessage($this->plugin->getLang()->get("prefix") . "§c" . $this->plugin->getLang()->get("no_permission"));
                     return true;
                 }
@@ -151,17 +151,20 @@ class WorldProtectCommand
             $lang->get("help_listadmin"),
         ];
 
+        // 世界管理员可以看到 enable/disable/set 命令
         if ($sender instanceof Player && $this->plugin->isAdmin($sender->getName())) {
             $help[] = $lang->get("help_enable");
             $help[] = $lang->get("help_disable");
             $help[] = $lang->get("help_set");
-            $help[] = $lang->get("help_addadmin");
-            $help[] = $lang->get("help_removeadmin");
-            $help[] = $lang->get("help_reload");
         } elseif ($sender instanceof \pocketmine\command\ConsoleCommandSender) {
             $help[] = $lang->get("help_enable");
             $help[] = $lang->get("help_disable");
             $help[] = $lang->get("help_set");
+        }
+
+        // 只有 MEBSociety 最高权限或控制台可以看到管理员管理和重载命令
+        if (($sender instanceof Player && $this->plugin->isMEBSocietyMaster($sender->getName())) ||
+            $sender instanceof \pocketmine\command\ConsoleCommandSender) {
             $help[] = $lang->get("help_addadmin");
             $help[] = $lang->get("help_removeadmin");
             $help[] = $lang->get("help_reload");
@@ -194,7 +197,7 @@ class WorldProtectCommand
 
     /**
      * 检查管理员权限（用于添加/删除管理员）
-     * 控制台、全局管理员（MEBSociety最高权限）和世界管理员都可以执行
+     * 仅控制台和 MEBSociety 最高权限可以执行
      */
     private function checkAdminPermission(CommandSender $sender, ?string $worldName): bool
     {
@@ -203,22 +206,13 @@ class WorldProtectCommand
             return true;
         }
 
-        // 如果没有提供世界名，检查是否是全局管理员
-        if ($worldName === null) {
-            if ($this->plugin->isAdmin($sender->getName())) {
-                return true;
-            }
-            $sender->sendMessage($this->plugin->getLang()->get("prefix") . "§c" . $this->plugin->getLang()->get("no_permission"));
-            return false;
+        // 检查是否是 MEBSociety 最高权限
+        if ($this->plugin->isMEBSocietyMaster($sender->getName())) {
+            return true;
         }
 
-        // 检查是否是该世界的管理员或全局管理员
-        if (!$this->plugin->isWorldAdmin($sender->getName(), $worldName)) {
-            $sender->sendMessage($this->plugin->getLang()->get("prefix") . "§c" . $this->plugin->getLang()->get("no_permission"));
-            return false;
-        }
-
-        return true;
+        $sender->sendMessage($this->plugin->getLang()->get("prefix") . "§c" . $this->plugin->getLang()->get("no_permission"));
+        return false;
     }
 
     private function handleInfo(CommandSender $sender, array $args): void
