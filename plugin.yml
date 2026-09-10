@@ -1,0 +1,23 @@
+name: MEBWorldProtect
+main: MengBao\MEBWorldProtect\Main
+version: 1.0.0
+api:
+- 5.0.0
+load: POSTWORLD
+softdepend: [MEBForms, MEBSociety]
+author: MengBao
+website: https://github.com/MengBaofh/MEBWorldProtect
+description: World protection plugin with comprehensive protection rules, liquid flow control and mob behavior restoration
+commands:
+ mebwp:
+  description: Managing world protection settings
+  permission: MEBWorldProtect.ge
+  usage: '/mebwp help'
+
+permissions:
+ MEBWorldProtect.ge:
+  default: true
+  description: General command
+ MEBWorldProtect.admin:
+  default: op
+  description: Admin permission to bypass all protections

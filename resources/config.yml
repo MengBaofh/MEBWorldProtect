@@ -1,0 +1,41 @@
+# MEBWorldProtect 配置文件
+# 语言: zh_CN, en_US
+language: zh_CN
+
+# 世界保护设置（按世界名配置）
+worlds:
+  # 示例配置
+  # world:
+  #   enabled: true
+  #   admins: []
+  #   disable_break: false
+  #   disable_place: false
+  #   disable_interact: false
+  #   disable_container: false
+  #   disable_pvp: false
+  #   disable_pve: false
+  #   disable_explosion: false
+  #   disable_fire_spread: false
+  #   disable_water_flow: false
+  #   disable_lava_flow: false
+  #   disable_item_drop: false
+  #   disable_item_pickup: false
+  #   restore_mob_behavior: false
+
+# 默认设置
+default:
+  enabled: false
+  admins: []
+  disable_break: false
+  disable_place: false
+  disable_interact: false
+  disable_container: false
+  disable_pvp: false
+  disable_pve: false
+  disable_explosion: false
+  disable_fire_spread: false
+  disable_water_flow: false
+  disable_lava_flow: false
+  disable_item_drop: false
+  disable_item_pickup: false
+  restore_mob_behavior: false
