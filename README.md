@@ -124,3 +124,302 @@ worlds:
 - `admins`: 世界管理员列表（不区分大小写）
 - 其他字段：各项保护规则的开关
 
+# MEBWorldProtect API 文档
+
+## 概述
+
+MEBWorldProtect 提供了公共API供其他插件使用，以实现统一的世界保护机制。
+
+## 公共API方法
+
+### 1. getWorldConfig(string $worldName): array
+
+获取指定世界的完整配置。
+
+**参数：**
+- `$worldName` - 世界文件夹名称
+
+**返回值：**
+- `array` - 世界配置数组，如果世界未配置则返回默认配置
+
+**示例：**
+```php
+$mebWorldProtect = $this->getServer()->getPluginManager()->getPlugin("MEBWorldProtect");
+if ($mebWorldProtect !== null) {
+    $config = $mebWorldProtect->getWorldConfig("world");
+    // $config = ["restore_mob_behavior" => true, "admins" => [...], ...]
+}
+```
+
+---
+
+### 2. canMobBehave(string $worldName): bool
+
+检查指定世界是否允许生物行为（移动、攻击等）。
+
+**参数：**
+- `$worldName` - 世界文件夹名称
+
+**返回值：**
+- `bool` - `true` 允许生物行为，`false` 禁止生物行为
+
+**示例：**
+```php
+$mebWorldProtect = $this->getServer()->getPluginManager()->getPlugin("MEBWorldProtect");
+if ($mebWorldProtect !== null) {
+    if ($mebWorldProtect->canMobBehave("world")) {
+        // 允许生物AI运行
+    } else {
+        // 禁止生物AI运行
+    }
+}
+```
+
+---
+
+### 3. setMobBehavior(string $worldName, bool $enabled): void
+
+设置指定世界的生物行为权限。
+
+**参数：**
+- `$worldName` - 世界文件夹名称
+- `$enabled` - `true` 允许，`false` 禁止
+
+**示例：**
+```php
+$mebWorldProtect = $this->getServer()->getPluginManager()->getPlugin("MEBWorldProtect");
+if ($mebWorldProtect !== null) {
+    // 禁用主世界的生物行为
+    $mebWorldProtect->setMobBehavior("world", false);
+}
+```
+
+---
+
+### 4. isWorldAdmin(string $playerName, string $worldName): bool
+
+检查玩家是否是指定世界的管理员。
+
+**参数：**
+- `$playerName` - 玩家名称
+- `$worldName` - 世界文件夹名称
+
+**返回值：**
+- `bool` - `true` 是管理员，`false` 不是
+
+---
+
+### 5. addWorldAdmin(string $worldName, string $playerName): bool
+
+添加世界管理员。
+
+**参数：**
+- `$worldName` - 世界文件夹名称
+- `$playerName` - 玩家名称
+
+**返回值：**
+- `bool` - `true` 添加成功，`false` 已经是管理员
+
+---
+
+### 6. removeWorldAdmin(string $worldName, string $playerName): bool
+
+移除世界管理员。
+
+**参数：**
+- `$worldName` - 世界文件夹名称
+- `$playerName` - 玩家名称
+
+**返回值：**
+- `bool` - `true` 移除成功，`false` 不是管理员
+
+---
+
+### 7. getWorldAdmins(string $worldName): array
+
+获取世界管理员列表。
+
+**参数：**
+- `$worldName` - 世界文件夹名称
+
+**返回值：**
+- `array` - 管理员名称数组
+
+---
+
+## 配置文件结构
+
+### config.yml
+
+```yaml
+language: zh_CN
+
+default:
+  restore_mob_behavior: true  # 默认允许生物行为
+  admins: []
+
+worlds:
+  world:
+    restore_mob_behavior: true
+    admins:
+      - "admin1"
+      - "admin2"
+  
+  dungeon:
+    restore_mob_behavior: false  # 副本禁止生物行为
+    admins:
+      - "admin1"
+```
+
+---
+
+## 与MEBMobAI集成
+
+### 集成方式
+
+MEBMobAI 使用 `canMobBehave()` API 来决定是否执行生物AI：
+
+```php
+// MEBMobAI内部实现
+private static function canMobBehave(Living $entity): bool
+{
+    $worldName = $entity->getWorld()->getFolderName();
+    
+    $mebWorldProtect = Server::getInstance()
+        ->getPluginManager()
+        ->getPlugin("MEBWorldProtect");
+    
+    if ($mebWorldProtect === null || !$mebWorldProtect->isEnabled()) {
+        return true; // 没有保护插件，默认允许
+    }
+    
+    return $mebWorldProtect->canMobBehave($worldName);
+}
+```
+
+### 工作流程
+
+```
+生物生成
+    ↓
+MEBMobAI附加AI组件
+    ↓
+每tick更新
+    ↓
+调用 MEBWorldProtect::canMobBehave()
+    ↓
+    ├─ true → 执行AI（移动、攻击）
+    └─ false → 跳过AI（生物静止）
+```
+
+---
+
+## 第三方插件集成指南
+
+### 步骤1：检查插件是否存在
+
+```php
+$mebWorldProtect = $this->getServer()
+    ->getPluginManager()
+    ->getPlugin("MEBWorldProtect");
+
+if ($mebWorldProtect === null || !$mebWorldProtect->isEnabled()) {
+    // 插件不存在，使用默认行为
+    return;
+}
+```
+
+### 步骤2：调用API
+
+```php
+// 检查生物行为权限
+$worldName = $entity->getWorld()->getFolderName();
+if (!$mebWorldProtect->canMobBehave($worldName)) {
+    // 该世界禁止生物行为，跳过AI
+    return;
+}
+
+// 执行你的插件逻辑
+```
+
+### 步骤3：错误处理
+
+```php
+try {
+    if (method_exists($mebWorldProtect, "canMobBehave")) {
+        return $mebWorldProtect->canMobBehave($worldName);
+    }
+} catch (\Throwable $e) {
+    // API调用失败，记录日志
+    $this->getLogger()->warning("调用MEBWorldProtect API失败: " . $e->getMessage());
+    return true; // 默认允许
+}
+```
+
+---
+
+## 软依赖配置
+
+在你的 `plugin.yml` 中添加软依赖：
+
+```yaml
+name: YourPlugin
+version: 1.0.0
+api: [5.0.0]
+softdepend: [MEBWorldProtect]
+```
+
+这样PocketMine会确保MEBWorldProtect在你的插件之前加载（如果存在）。
+
+---
+
+## 最佳实践
+
+### 1. 始终检查插件存在性
+```php
+if ($plugin === null || !$plugin->isEnabled()) {
+    // 默认行为
+}
+```
+
+### 2. 使用 method_exists 检查
+```php
+if (method_exists($plugin, "canMobBehave")) {
+    // 调用API
+}
+```
+
+### 3. 提供回退方案
+```php
+try {
+    return $plugin->canMobBehave($worldName);
+} catch (\Throwable $e) {
+    return true; // 默认允许
+}
+```
+
+### 4. 不要直接读取配置文件
+❌ **错误做法：**
+```php
+$config = yaml_parse_file($plugin->getDataFolder() . "config.yml");
+```
+
+✅ **正确做法：**
+```php
+$config = $plugin->getWorldConfig($worldName);
+```
+
+---
+
+## 版本兼容性
+
+- **MEBWorldProtect** 1.0.0+
+- **PocketMine-MP** 5.0.0+
+
+---
+
+## 支持
+
+如有问题请访问：
+- GitHub: https://github.com/MengBaofh/MEBWorldProtect
+- 文档：查看本文件

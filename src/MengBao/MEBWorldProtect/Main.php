@@ -231,4 +231,44 @@ class Main extends PluginBase
 
         return $worlds[$worldName]["admins"] ?? [];
     }
+
+    /**
+     * API: 获取世界配置
+     */
+    public function getWorldConfig(string $worldName): array
+    {
+        $worlds = $this->config->get("worlds", []);
+
+        if (!isset($worlds[$worldName])) {
+            // 返回默认配置
+            return $this->config->get("default", []);
+        }
+
+        return $worlds[$worldName];
+    }
+
+    /**
+     * API: 检查世界是否允许生物行为
+     */
+    public function canMobBehave(string $worldName): bool
+    {
+        $worldConfig = $this->getWorldConfig($worldName);
+        return $worldConfig["restore_mob_behavior"] ?? true;
+    }
+
+    /**
+     * API: 设置世界生物行为配置
+     */
+    public function setMobBehavior(string $worldName, bool $enabled): void
+    {
+        $worlds = $this->config->get("worlds", []);
+
+        if (!isset($worlds[$worldName])) {
+            $worlds[$worldName] = $this->config->get("default", []);
+        }
+
+        $worlds[$worldName]["restore_mob_behavior"] = $enabled;
+        $this->config->set("worlds", $worlds);
+        $this->config->save();
+    }
 }
