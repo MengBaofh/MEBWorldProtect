@@ -273,47 +273,6 @@ worlds:
 
 ---
 
-## 与MEBMobAI集成
-
-### 集成方式
-
-MEBMobAI 使用 `canMobBehave()` API 来决定是否执行生物AI：
-
-```php
-// MEBMobAI内部实现
-private static function canMobBehave(Living $entity): bool
-{
-    $worldName = $entity->getWorld()->getFolderName();
-    
-    $mebWorldProtect = Server::getInstance()
-        ->getPluginManager()
-        ->getPlugin("MEBWorldProtect");
-    
-    if ($mebWorldProtect === null || !$mebWorldProtect->isEnabled()) {
-        return true; // 没有保护插件，默认允许
-    }
-    
-    return $mebWorldProtect->canMobBehave($worldName);
-}
-```
-
-### 工作流程
-
-```
-生物生成
-    ↓
-MEBMobAI附加AI组件
-    ↓
-每tick更新
-    ↓
-调用 MEBWorldProtect::canMobBehave()
-    ↓
-    ├─ true → 执行AI（移动、攻击）
-    └─ false → 跳过AI（生物静止）
-```
-
----
-
 ## 第三方插件集成指南
 
 ### 步骤1：检查插件是否存在
